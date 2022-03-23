@@ -1,7 +1,10 @@
 import express from 'express';
 import { ObjectId } from 'mongodb';
 import { mongoClient } from '../utils/database/mongo.databse.js';
+import authenticationRouter from './auth.routes.js';
 var router = express.Router();
+
+router.use("/auth", authenticationRouter)
 
 /* GET home page. */
 router.get('/', async function (req, res, next) {
