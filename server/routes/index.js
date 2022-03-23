@@ -3,10 +3,12 @@ import { ObjectId } from 'mongodb';
 import { mongoClient } from '../utils/database/mongo.databse.js';
 import authenticationRouter from './auth.routes.js';
 import userRouter from "./user.routes.js";
+import orderRouter from "./order.routes.js";
 let router = express.Router();
 
 router.use("/auth", authenticationRouter)
 router.use("/user", userRouter)
+router.use("/order", orderRouter)
 
 /* GET home page. */
 router.get('/', async function (req, res, next) {

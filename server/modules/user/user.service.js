@@ -14,13 +14,49 @@ const getAdminByAdminID = async (userID) => {
     }
 }
 
+const getUserByUserID = async (userID) => {
+    try{
+        let query = {
+            _id: ObjectId(userID)
+        }
+
+        let user = await mongoClient.db().collection("users").findOne(query);
+
+        if(user){
+            return {
+                success: true,
+                data: user
+            }
+        }else {
+            return {
+                success: false,
+                failReason: "No user with this id found"
+            }
+        }
+    }catch (error){
+        return{
+            success: false,
+            failReason: "Uncaught"
+        }
+    }
+}
+
 const createUser = async (userDetails) => {
     try{
         let userObject =  {
             firstName: userDetails.firstName,
             lastName: userDetails.lastName,
             emailID: userDetails.emailID,
-            password: userDetails.password
+            password: userDetails.password,
+            address: {
+                line1 : "",
+                line2: "",
+                city:"",
+                state: "",
+                country: "",
+                pin: ""
+            },
+            orders: []
         }
 
         let insertStatus = await mongoClient.db().collection("users").insertOne(userObject);
@@ -99,7 +135,8 @@ const addUserAddress = async (userID, userAddress) => {
 const userService = {
     getAdminByAdminID,
     createUser,
-    addUserAddress
+    addUserAddress,
+    getUserByUserID,
 }
 
 export default userService

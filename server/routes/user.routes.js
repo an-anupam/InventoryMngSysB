@@ -57,4 +57,31 @@ userRouter.post("/set-address/:userID", async (req, res) => {
     }
 })
 
+userRouter.get("/:userID", async (req, res) => {
+    let appResponseStatus = 500
+    let appResponse = new Response
+    try{
+        let {userID} = req.params
+
+        let {success, data, failReason, failCode} = await userService.getUserByUserID(userID);
+
+        if(success){
+            appResponseStatus= 200;
+            appResponse.setSuccess(data)
+            return
+        }else{
+            appResponseStatus= 400;
+            appResponse.setError(failCode? failCode: "", failReason? failReason: "Failed to fetch user details", null)
+            return
+        }
+    }catch (error){
+        appResponse.setError('CL-GR-RE-3-UNCAUGHT', 'Internal server error', null);
+        return
+        appResponseStatus = 500;
+    }finally {
+        res.status(appResponseStatus).json(appResponse);
+    }
+})
+
+
 export default userRouter;
