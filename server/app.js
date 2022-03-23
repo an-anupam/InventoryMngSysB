@@ -3,6 +3,9 @@ import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import indexRouter from './routes/index.js';
+import { initMongoDB } from './utils/database/mongo.databse.js';
+
+await initMongoDB();
 
 var app = express();
 app.use(logger('dev'));
