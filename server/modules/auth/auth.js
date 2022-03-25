@@ -34,7 +34,7 @@ export const handelAdminAuthLogin = (req, res, next) => {
                     )
                     return res.status(401).json(response);
                 }
-                response.setSuccess("Successfully signed-in.")
+                response.setSuccess(user)
                 res.header('Content-Type', 'application/json;charset=UTF-8')
                 res.header('Access-Control-Allow-Credentials', true)
                 res.header(

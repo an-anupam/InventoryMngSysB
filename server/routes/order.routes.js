@@ -23,6 +23,32 @@ orderRouter.get("/:userID", async (req, res) => {
         }
     }catch (error){
         appResponse.setError('CL-GR-RE-3-UNCAUGHT', 'Internal server error', null);
+        appResponseStatus = 500;
+        return
+    }finally {
+        res.status(appResponseStatus).json(appResponse);
+    }
+})
+
+orderRouter.post("/", async (req, res) => {
+    let appResponseStatus = 500
+    let appResponse = new Response
+    try{
+        let {orderDetails, userID} = req.body;
+
+        let {success, data, failReason, failCode} = await orderService.placeOrder(orderDetails, userID);
+
+        if(success){
+            appResponseStatus= 201;
+            appResponse.setSuccess(data)
+            return
+        }else{
+            appResponseStatus= 400;
+            appResponse.setError(failCode? failCode: "", failReason? failReason: "Failed to place order", null)
+            return
+        }
+    }catch (error){
+        appResponse.setError('CL-GR-RE-3-UNCAUGHT', 'Internal server error', null);
         return
         appResponseStatus = 500;
     }finally {

@@ -57,6 +57,111 @@ userRouter.post("/set-address/:userID", async (req, res) => {
     }
 })
 
+userRouter.get("/cart/:userID/:productID", async (req, res) => {
+    let appResponseStatus = 500
+    let appResponse = new Response
+    try{
+        let {userID, productID} = req.params
+        console.log(userID, productID)
+        let {success, data, failReason, failCode} = await userService.addProductToUserCart(userID, productID);
+
+        if(success){
+            appResponseStatus= 201;
+            appResponse.setSuccess(data)
+            return
+        }else{
+            appResponseStatus= 400;
+            appResponse.setError(failCode? failCode: "", failReason? failReason: "Failed to add product to cart", null)
+            return
+        }
+    }catch (error){
+        appResponse.setError('CL-GR-RE-3-UNCAUGHT', 'Internal server error', null);
+        return
+        appResponseStatus = 500;
+    }finally {
+        res.status(appResponseStatus).json(appResponse);
+    }
+})
+
+
+userRouter.delete("/cart/:userID/:productID", async (req, res) => {
+    let appResponseStatus = 500
+    let appResponse = new Response
+    try{
+        let {userID, productID} = req.params
+        console.log(userID, productID)
+        let {success, data, failReason, failCode} = await userService.removeProductFromUserCart(userID, productID);
+
+        if(success){
+            appResponseStatus= 201;
+            appResponse.setSuccess(data)
+            return
+        }else{
+            appResponseStatus= 400;
+            appResponse.setError(failCode? failCode: "", failReason? failReason: "Failed to remove product from cart", null)
+            return
+        }
+    }catch (error){
+        appResponse.setError('CL-GR-RE-3-UNCAUGHT', 'Internal server error', null);
+        return
+        appResponseStatus = 500;
+    }finally {
+        res.status(appResponseStatus).json(appResponse);
+    }
+})
+
+userRouter.get("/cart/:userID", async (req, res) => {
+    let appResponseStatus = 500
+    let appResponse = new Response
+    try{
+        let {userID} = req.params
+        let {success, data, failReason, failCode} = await userService.getUserCart(userID);
+
+        if(success){
+            appResponseStatus= 200;
+            console.log(data)
+            appResponse.setSuccess(data)
+            return
+        }else{
+            appResponseStatus= 400;
+            appResponse.setError(failCode? failCode: "", failReason? failReason: "Failed to add product to cart", null)
+            return
+        }
+    }catch (error){
+        appResponse.setError('CL-GR-RE-3-UNCAUGHT', 'Internal server error', null);
+        return
+        appResponseStatus = 500;
+    }finally {
+        res.status(appResponseStatus).json(appResponse);
+    }
+})
+
+userRouter.get("/cart-with-products/:userID", async (req, res) => {
+    let appResponseStatus = 500
+    let appResponse = new Response
+    try{
+        let {userID} = req.params
+        let {success, data, failReason, failCode} = await userService.getUserCartWithProducts(userID);
+
+        if(success){
+            appResponseStatus= 200;
+            console.log(data)
+            appResponse.setSuccess(data)
+            return
+        }else{
+            appResponseStatus= 400;
+            appResponse.setError(failCode? failCode: "", failReason? failReason: "Failed to add product to cart", null)
+            return
+        }
+    }catch (error){
+        appResponse.setError('CL-GR-RE-3-UNCAUGHT', 'Internal server error', null);
+        return
+        appResponseStatus = 500;
+    }finally {
+        res.status(appResponseStatus).json(appResponse);
+    }
+})
+
 userRouter.get("/:userID", async (req, res) => {
     let appResponseStatus = 500
     let appResponse = new Response

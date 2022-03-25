@@ -1,5 +1,6 @@
 import {ObjectId} from "mongodb";
 import {mongoClient} from "../../utils/database/mongo.databse.js";
+import * as Console from "console";
 
 const getUserOrders = async (userID) => {
     try{
@@ -35,8 +36,54 @@ const getUserOrders = async (userID) => {
 }
 
 
+const placeOrder = async (orderDetails, userID) => {
+    try {
+
+        await orderDetails.map(async (order) => {
+                let query = {
+                _id : ObjectId(order.cart)
+            }
+
+            let update = {
+                $inc : {
+                    quantityAvailable : -(order.quantity)
+                }
+            }
+
+            let status = await mongoClient.db().collection("products").findOneAndUpdate(query, update)
+        })
+
+        let query = {
+            _id : ObjectId(userID)
+        }
+
+        let update = {
+            $push: {
+                orders: orderDetails
+            },
+            $set : {
+                cart : []
+            }
+        }
+
+        let status = await mongoClient.db().collection("users").findOneAndUpdate(query, update)
+
+        console.log(status)
+        return{
+            success: true,
+            data: "Successfully placed your order"
+        }
+    }catch (error){
+        return {
+            success: true,
+            failReason: "service error"
+        }
+    }
+}
+
 const orderService = {
-    getUserOrders
+    getUserOrders,
+    placeOrder
 }
 
 export default orderService

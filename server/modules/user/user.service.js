@@ -132,11 +132,187 @@ const addUserAddress = async (userID, userAddress) => {
     }
 }
 
+const getUserCart = async (userID) => {
+    try {
+
+        let query = {
+            _id: ObjectId(userID)
+        }
+
+        let project = {
+            _id: 0,
+            cart: 1
+        }
+
+        let userObject = await mongoClient.db().collection("users").findOne(query, {projection : project})
+        console.log(userObject
+        )
+        if(userObject){
+            return {
+                success: true,
+                data : userObject.cart
+            }
+        }else{
+            return {
+                success: false,
+                failReason: "Failed to fetch cart"
+            }
+        }
+    }catch (error){
+        console.log(error)
+        return{
+            success: false,
+            failReason: "service error"
+        }
+    }
+}
+
+
+const getUserCartWithProducts = async (userID) => {
+    try {
+
+        let query = {
+            _id: ObjectId(userID)
+        }
+
+        let project = {
+            _id: 0,
+            cart: 1
+        }
+
+        // let userObject = await mongoClient.db().collection("users").aggregate([
+        //     { $match: query},
+        //     { $project: {_id: 0, cart: 1}},
+        //     {$unwind: { path : "$cart"}},
+        //     { $lookup : {
+        //         from: "products",
+        //             localField: 'cart',
+        //             foreignField: '_id',
+        //             as: 'productDetails'
+        //         }}
+        // ])
+
+        let userObject = await mongoClient.db().collection("users").aggregate([
+            { $match: query},
+            { $project: {_id: 0, cart: 1}},
+            {$unwind: { path : "$cart"}},
+            { $lookup : {
+                    from: "products",
+                    localField: 'cart',
+                    foreignField: '_id',
+                    as: 'productDetails'
+                }},
+            {$unwind: { path : "$productDetails"}},
+        ])
+
+        let cart = await    userObject.toArray();
+
+        console.log(cart)
+        if(userObject){
+            return {
+                success: true,
+                data : cart
+            }
+        }else{
+            return {
+                success: false,
+                failReason: "Failed to fetch cart"
+            }
+        }
+    }catch (error){
+        console.log(error)
+        return{
+            success: false,
+            failReason: "service error"
+        }
+    }
+}
+
+const addProductToUserCart = async (userID , productID) => {
+    console.log(userID, productID)
+    try {
+        let query = {
+            _id: ObjectId(userID)
+        }
+
+        let update = {
+            $addToSet : {
+                cart : ObjectId(productID)
+            }
+        }
+
+        let updateStatus = await mongoClient.db().collection("users").findOneAndUpdate(query, update);
+
+        if(updateStatus.lastErrorObject &&
+            updateStatus.lastErrorObject.n === 1 &&
+            updateStatus.lastErrorObject.updatedExisting){
+            return {
+                success: true,
+                data: "successfully added product to cart."
+            }
+        }else {
+            return {
+                success: false,
+                failReason: "Failed to add product to cart."
+            }
+        }
+    }catch (error){
+        console.log(error)
+        return{
+            success: false,
+            failReason: "service error"
+        }
+    }
+}
+
+
+const removeProductFromUserCart = async (userID , productID) => {
+    console.log(userID, productID)
+    try {
+        let query = {
+            _id: ObjectId(userID)
+        }
+
+        let update = {
+            $pull : {
+                cart : ObjectId(productID)
+            }
+        }
+
+        let updateStatus = await mongoClient.db().collection("users").findOneAndUpdate(query, update);
+
+        if(updateStatus.lastErrorObject &&
+            updateStatus.lastErrorObject.n === 1 &&
+            updateStatus.lastErrorObject.updatedExisting){
+            return {
+                success: true,
+                data: "successfully removed product from cart."
+            }
+        }else {
+            return {
+                success: false,
+                failReason: "Failed to remove product from cart."
+            }
+        }
+    }catch (error){
+        console.log(error)
+        return{
+            success: false,
+            failReason: "service error"
+        }
+    }
+}
+
+
 const userService = {
     getAdminByAdminID,
     createUser,
     addUserAddress,
     getUserByUserID,
+    addProductToUserCart,
+    getUserCart,
+    getUserCartWithProducts,
+    removeProductFromUserCart,
 }
 
 export default userService
